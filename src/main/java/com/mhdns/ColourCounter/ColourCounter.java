@@ -2,6 +2,7 @@ package com.mhdns.ColourCounter;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
@@ -20,7 +21,7 @@ public class ColourCounter {
 
         // write configs
         Properties config = new Properties();
-        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "application-id");
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "application-name");
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -31,10 +32,10 @@ public class ColourCounter {
         StreamsBuilder builder = new StreamsBuilder();
 
         // Get data from input stream fav-colour-input
-        KStream<String, String> initialStream = builder.stream("fav-colour-input");
+        KStream<String, String> inputStream = builder.stream("fav-colour-input");
 
         // set key values for new stream
-        KStream<String, String> interStream = initialStream
+        KStream<String, String> interStream = inputStream
                 .filter((key, value) -> value.contains(","))
                 .selectKey((key, value) -> value.split(",")[0].toLowerCase())
                 .mapValues((key, value) -> value.split(",")[1].toLowerCase());
@@ -58,6 +59,7 @@ public class ColourCounter {
 
         // Start Stream
         stream.start();
+
         // Print topology
         System.out.println(stream.toString());
 
